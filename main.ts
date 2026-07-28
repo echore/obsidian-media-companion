@@ -139,7 +139,6 @@ class MediaCompanionSettingTab extends PluginSettingTab {
 		const foldersDebounce = debounce(async (value: string) => {
 			this.plugin.settings.includedFolders = normalizeFolders(value);
 			await this.plugin.saveSettings();
-			await this.plugin.cache.updateExtensions();
 		}, 500, true);
 
 		containerEl.empty();
@@ -167,12 +166,17 @@ class MediaCompanionSettingTab extends PluginSettingTab {
 		new Setting(containerEl)
 			.setName('Included folders')
 			.setDesc('Only scan these folders for media (comma or newline separated). Leave empty to scan the entire vault.')
-			.addTextArea(text => text
-				.setPlaceholder('Inspiration, Assets/refs')
-				.setValue(this.plugin.settings.includedFolders.join(', '))
-				.onChange(async (value) => {
-					foldersDebounce(value);
-				}));
+			.addTextArea(text => {
+				text.setPlaceholder('Inspiration, Assets/refs')
+					.setValue(this.plugin.settings.includedFolders.join(', '))
+					.onChange(async (value) => {
+						foldersDebounce(value);
+					});
+				text.inputEl.addEventListener("blur", async () => {
+					await this.plugin.cache.updateExtensions();
+				});
+				return text;
+			});
 
 		new Setting(containerEl)
 			.setName('Sidecar template')
