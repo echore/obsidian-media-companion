@@ -2,6 +2,7 @@ export interface MediaCompanionSettings {
 	hideSidecar: boolean;
 	extensions: string[];
 	sidecarTemplate: string;
+	includedFolders: string[];
 
 	apiEnabled: boolean;
 	apiPort: number;
@@ -27,6 +28,7 @@ export const DEFAULT_SETTINGS: MediaCompanionSettings = {
 		'mov',
 	],
 	sidecarTemplate: "",
+	includedFolders: [],
 
 	apiEnabled: false,
 	apiPort: 27124,

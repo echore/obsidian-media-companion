@@ -5,6 +5,7 @@ import type Cache from "./cache";
 import { getMediaType, MediaTypes } from "./model/types/mediaTypes";
 import MCImage from "./model/types/image/image";
 import Sidecar from "./model/sidecar";
+import { isWithinFolders } from "./util/folderFilter";
 
 /**
  * Handles mutations in the vault
@@ -124,6 +125,12 @@ export default class MutationHandler extends EventTarget {
 			void this.app.fileManager.renameFile(sidecar, `${file.path}${Sidecar.EXTENSION}`);
 		}
 
+		if (cacheFile && !isWithinFolders(file.path, this.plugin.settings.includedFolders)) {
+			this.cache.removeFile(file);
+			this.dispatchEvent(new CustomEvent("file-deleted", { detail: cacheFile }));
+			return;
+		}
+
 		if (!cacheFile) {
 			this.createMediaFile(file, sidecar).then((mediaFile) => {
 				if (mediaFile) {
@@ -155,6 +162,8 @@ export default class MutationHandler extends EventTarget {
 	 */
 	private async createMediaFile(file: TAbstractFile, sidecar: TFile | null = null): Promise<MediaFile | null> {
 		if (!(file instanceof TFile) || !this.plugin.settings.extensions.contains(file.extension.toLowerCase())) return null;
+
+		if (!isWithinFolders(file.path, this.plugin.settings.includedFolders)) return null;
 
 		// Make sure it is not already in the cache
 		if (this.cache.getFile(file.path)) return null;

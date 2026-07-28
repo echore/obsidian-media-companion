@@ -7,6 +7,7 @@ import MediaFile from 'src/model/mediaFile';
 import { SidecarView, VIEW_TYPE_SIDECAR } from 'src/views/sidecar-view';
 import { WaterfallBasesView, BASES_VIEW_TYPE_WATERFALL, getWaterfallViewOptions } from 'src/views/waterfall-bases-view';
 import ApiServer from 'src/api/server';
+import { normalizeFolders } from 'src/util/folderFilter';
 
 export default class MediaCompanion extends Plugin {
 	settings!: MediaCompanionSettings;
@@ -135,6 +136,12 @@ class MediaCompanionSettingTab extends PluginSettingTab {
 			await this.plugin.cache.updateExtensions();
 		}, 500, true);
 
+		const foldersDebounce = debounce(async (value: string) => {
+			this.plugin.settings.includedFolders = normalizeFolders(value);
+			await this.plugin.saveSettings();
+			await this.plugin.cache.updateExtensions();
+		}, 500, true);
+
 		containerEl.empty();
 
 		new Setting(containerEl)
@@ -155,6 +162,16 @@ class MediaCompanionSettingTab extends PluginSettingTab {
 				.setValue(this.plugin.settings.extensions.join(', '))
 				.onChange(async (value) => {
 					extensionDebounce(value);
+				}));
+
+		new Setting(containerEl)
+			.setName('Included folders')
+			.setDesc('Only scan these folders for media (comma or newline separated). Leave empty to scan the entire vault.')
+			.addTextArea(text => text
+				.setPlaceholder('Inspiration, Assets/refs')
+				.setValue(this.plugin.settings.includedFolders.join(', '))
+				.onChange(async (value) => {
+					foldersDebounce(value);
 				}));
 
 		new Setting(containerEl)
