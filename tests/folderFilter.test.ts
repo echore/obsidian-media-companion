@@ -24,6 +24,12 @@ describe("isWithinFolders", () => {
 	it("supports multiple folders", () => {
 		expect(isWithinFolders("refs/e.png", ["灵感库", "refs"])).toBe(true);
 	});
+	it("matches case-insensitively", () => {
+		expect(isWithinFolders("Inspiration/a.png", ["inspiration"])).toBe(true);
+	});
+	it("matches unicode paths regardless of case-insensitivity", () => {
+		expect(isWithinFolders("灵感库/a.png", ["灵感库"])).toBe(true);
+	});
 });
 
 describe("normalizeFolders", () => {
