@@ -6,6 +6,7 @@
 	"scripts": {
 		"dev": "node esbuild.config.mjs",
 		"build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production",
+		"test": "vitest run",
 		"version": "node version-bump.mjs && git add manifest.json versions.json"
 	},
 	"keywords": [],
@@ -21,7 +22,8 @@
 		"obsidian": "latest",
 		"obsidian-typings": "^2.3.4",
 		"tslib": "2.4.0",
-		"typescript": "^5.4.5"
+		"typescript": "^5.4.5",
+		"vitest": "^4.1.10"
 	},
 	"dependencies": {
 		"extract-colors": "^4.0.4"
