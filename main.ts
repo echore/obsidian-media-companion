@@ -173,6 +173,7 @@ class MediaCompanionSettingTab extends PluginSettingTab {
 						foldersDebounce(value);
 					});
 				text.inputEl.addEventListener("blur", async () => {
+					await foldersDebounce.run();
 					await this.plugin.cache.updateExtensions();
 				});
 				return text;
