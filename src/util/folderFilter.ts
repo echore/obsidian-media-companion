@@ -1,11 +1,16 @@
 /**
  * Returns whether a vault-relative file path lies within any of the given
- * folders. An empty folder list means no restriction (include everything),
- * which preserves the plugin's default behavior.
+ * folders. Matching is case-insensitive. An empty folder list means no
+ * restriction (include everything), which preserves the plugin's default
+ * behavior.
  */
 export function isWithinFolders(path: string, folders: string[]): boolean {
 	if (folders.length === 0) return true;
-	return folders.some(folder => path === folder || path.startsWith(`${folder}/`));
+	const lowerPath = path.toLowerCase();
+	return folders.some(folder => {
+		const lowerFolder = folder.toLowerCase();
+		return lowerPath === lowerFolder || lowerPath.startsWith(`${lowerFolder}/`);
+	});
 }
 
 /**
