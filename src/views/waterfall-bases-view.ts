@@ -3,6 +3,7 @@ import Sidecar from "../model/sidecar";
 import { getMediaType, MediaTypes } from "../model/types/mediaTypes";
 import { getShape } from "../model/types/shape";
 import { hexToRgb, rgbToHsl, isColorWithinThreshold } from "../util/color";
+import { isWithinFolders } from "../util/folderFilter";
 import { VIEW_TYPE_SIDECAR } from "./sidecar-view";
 import type { MediaCompanionSettings } from "../settings";
 
@@ -292,7 +293,7 @@ export class WaterfallBasesView extends BasesView implements HoverParent {
 					
 					const mediaFile = this.app.vault.getFileByPath(mediaPath);
 					
-					if (!mediaFile) continue;
+					if (!mediaFile || !isWithinFolders(mediaFile.path, this.getPluginSettings().includedFolders)) continue;
 
 					seenMediaPaths.add(mediaPath);
 					const meta = this.readSidecarMeta(sidecarFile);
@@ -641,6 +642,8 @@ export class WaterfallBasesView extends BasesView implements HoverParent {
 		const mediaType = getMediaType(item.mediaFile.extension);
 
 		const onSized = (naturalW: number, naturalH: number) => {
+			if (!this.layoutItems.includes(item)) return;
+
 			const ph = mc.querySelector(".mc-waterfall-placeholder");
 			
 			if (ph) ph.remove();
@@ -695,16 +698,20 @@ export class WaterfallBasesView extends BasesView implements HoverParent {
 	}
 
 	private resolveMediaFile(file: TFile): { mediaFile: TFile; sidecarFile: TFile | null } | null {
+		const includedFolders = this.getPluginSettings().includedFolders;
+
 		if (file.path.endsWith(Sidecar.EXTENSION)) {
 			const mediaPath = file.path.slice(0, -Sidecar.EXTENSION.length);
 			const mediaFile = this.app.vault.getFileByPath(mediaPath);
 			
-			return mediaFile ? { mediaFile, sidecarFile: file } : null;
+			return mediaFile && isWithinFolders(mediaFile.path, includedFolders)
+				? { mediaFile, sidecarFile: file }
+				: null;
 		}
 
 		const mediaType = getMediaType(file.extension);
 		
-		if (mediaType !== MediaTypes.Unknown) {
+		if (mediaType !== MediaTypes.Unknown && isWithinFolders(file.path, includedFolders)) {
 			const sidecarFile = this.app.vault.getFileByPath(`${file.path}${Sidecar.EXTENSION}`);
 			
 			return { mediaFile: file, sidecarFile };
@@ -1033,17 +1040,14 @@ export class WaterfallBasesView extends BasesView implements HoverParent {
 	}
 
 	/**
-	 * Unmount and re-mount all currently visible items so they pick up
-	 * the latest plugin settings (e.g. fullscreen mode changes).
+	 * Rebuild layout items so they pick up the latest plugin settings,
+	 * including changes to the included folders.
 	 */
 	private refreshVisibleItems(): void {
-		for (const item of this.layoutItems) {
-			if (item.el) {
-				item.el.remove();
-				item.el = null;
-			}
-		}
-		this.syncDOM();
+		this.clearHoverTimer();
+		this.dismissFullscreen();
+		this.lastDataFingerprint = "";
+		this.onDataUpdated();
 	}
 
 	onunload(): void {

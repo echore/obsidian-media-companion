@@ -132,6 +132,7 @@ export default class Cache {
 
 		this.files = this.files.filter(f => this.plugin.settings.extensions.contains(f.file.extension.toLowerCase())
 			&& isWithinFolders(f.file.path, this.plugin.settings.includedFolders));
+		this.rebuildIndexes();
 
 		let files = this.app.vault.getFiles();
 
@@ -169,12 +170,20 @@ export default class Cache {
 	}
 
 	/**
-     * Add a file to the cache
-     * @param file The file to add to the cache
-     */
-	public addFile(file: MediaFile): void {
-		this.files.push(file);
+	 * Add a file to the cache
+	 * @param file The file to add to the cache
+	 * @returns Whether the file was added
+	 */
+	public addFile(file: MediaFile): boolean {
+		if (!isWithinFolders(file.file.path, this.plugin.settings.includedFolders)) return false;
 
+		this.files.push(file);
+		this.indexFile(file);
+
+		return true;
+	}
+
+	private indexFile(file: MediaFile): void {
 		// Update paths
 		if (file.file.parent?.path) {
 			for (const path of this.getPathHierarchy(file.file.parent?.path)) {
@@ -193,6 +202,16 @@ export default class Cache {
 					this.addCounter(this.tags, path);
 				}
 			}
+		}
+	}
+
+	private rebuildIndexes(): void {
+		this.paths = {};
+		this.tags = {};
+		this.extensions = {};
+
+		for (const file of this.files) {
+			this.indexFile(file);
 		}
 	}
 

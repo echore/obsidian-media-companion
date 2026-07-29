@@ -180,10 +180,10 @@ export default class MutationHandler extends EventTarget {
 				break;
 		}
 
-		if (mediaFile) {
-			this.cache.addFile(mediaFile);
+		if (mediaFile && this.cache.addFile(mediaFile)) {
+			return mediaFile;
 		}
 
-		return mediaFile;
+		return null;
 	}
 }
