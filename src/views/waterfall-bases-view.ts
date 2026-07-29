@@ -5,7 +5,6 @@ import { getShape } from "../model/types/shape";
 import { hexToRgb, rgbToHsl, isColorWithinThreshold } from "../util/color";
 import { VIEW_TYPE_SIDECAR } from "./sidecar-view";
 import type { MediaCompanionSettings } from "../settings";
-import { mulberry32, shuffleInPlace } from "../util/shuffle";
 
 export const BASES_VIEW_TYPE_WATERFALL = "mc-waterfall";
 
@@ -49,9 +48,6 @@ export class WaterfallBasesView extends BasesView implements HoverParent {
 	private numColumns = 1;
 	private colWidthSetting = 200;
 	private gap = 8;
-	// One seed per view instance: each open gets a fresh order, while
-	// scrolling within the same instance stays stable.
-	private shuffleSeed = Math.floor(Math.random() * 0xffffffff);
 	private showFilename = true;
 	private showProperties = false;
 
@@ -119,10 +115,9 @@ export class WaterfallBasesView extends BasesView implements HoverParent {
 		const filterMinHeight = parseInt(String(this.config.get("filterMinHeight") || ""), 10) || 0;
 		const filterMaxHeight = parseInt(String(this.config.get("filterMaxHeight") || ""), 10) || 0;
 		const searchQuery = String(this.config.get("searchQuery") || "").trim().toLowerCase();
-		const shuffleOrder = this.config.get("shuffleOrder") === true;
 
 		const dataIds = this.data.groupedData.flatMap(g => g.entries.map(e => e.file.path)).join("\n");
-		const fingerprint = `${dataIds}|${filterColor}|${colorThreshold}|${filterShape}|${filterMinWidth}|${filterMaxWidth}|${filterMinHeight}|${filterMaxHeight}|${searchQuery}|${shuffleOrder}`;
+		const fingerprint = `${dataIds}|${filterColor}|${colorThreshold}|${filterShape}|${filterMinWidth}|${filterMaxWidth}|${filterMinHeight}|${filterMaxHeight}|${searchQuery}`;
 
 		const layoutOnly = fingerprint === this.lastDataFingerprint && this.layoutItems.length > 0;
 
@@ -322,10 +317,6 @@ export class WaterfallBasesView extends BasesView implements HoverParent {
 					remaining--;
 				}
 			}
-		}
-
-		if (shuffleOrder) {
-			shuffleInPlace(this.layoutItems, mulberry32(this.shuffleSeed));
 		}
 
 		if (this.layoutItems.length === 0) {
@@ -1103,18 +1094,6 @@ export function getWaterfallViewOptions(): any[] {
 					type: "toggle",
 					key: "showProperties",
 					displayName: "Show properties",
-					default: false,
-				},
-			],
-		},
-		{
-			type: "group",
-			displayName: "Order",
-			items: [
-				{
-					type: "toggle",
-					key: "shuffleOrder",
-					displayName: "Shuffle on open",
 					default: false,
 				},
 			],
