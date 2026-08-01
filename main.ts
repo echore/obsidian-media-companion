@@ -195,7 +195,7 @@ class MediaCompanionSettingTab extends PluginSettingTab {
 		containerEl.createEl('p', {
 			text: 'Lets the Inspiration Clipper browser extension save clips into this vault. '
 				+ 'The server listens on 127.0.0.1 only — nothing is reachable from the network, '
-				+ 'but other apps on this computer could call it. Set an API key below to lock it '
+				+ 'but other apps and websites on this computer could call it. Set an API key below to lock it '
 				+ 'down, or turn this off if you don\'t use the extension.',
 			cls: 'setting-item-description',
 		});
