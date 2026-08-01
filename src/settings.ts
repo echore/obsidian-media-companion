@@ -30,7 +30,7 @@ export const DEFAULT_SETTINGS: MediaCompanionSettings = {
 	sidecarTemplate: "",
 	includedFolders: [],
 
-	apiEnabled: false,
+	apiEnabled: true,
 	apiPort: 27124,
 	apiKey: "",
 

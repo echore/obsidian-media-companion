@@ -192,6 +192,14 @@ class MediaCompanionSettingTab extends PluginSettingTab {
 
 		containerEl.createEl('h3', { text: 'Browser Extension API' });
 
+		containerEl.createEl('p', {
+			text: 'Lets the Inspiration Clipper browser extension save clips into this vault. '
+				+ 'The server listens on 127.0.0.1 only — nothing is reachable from the network, '
+				+ 'but other apps on this computer could call it. Set an API key below to lock it '
+				+ 'down, or turn this off if you don\'t use the extension.',
+			cls: 'setting-item-description',
+		});
+
 		if (!Platform.isDesktopApp) {
 			containerEl.createEl('p', {
 				text: 'The API server is only available on desktop.',
@@ -201,7 +209,7 @@ class MediaCompanionSettingTab extends PluginSettingTab {
 
 		new Setting(containerEl)
 			.setName('Enable API server')
-			.setDesc('Start a local HTTP server so the browser extension can communicate with this plugin. Desktop only.')
+			.setDesc('On by default so the browser extension works out of the box. Desktop only.')
 			.addToggle(toggle => toggle
 				.setValue(this.plugin.settings.apiEnabled)
 				.setDisabled(!Platform.isDesktopApp)
