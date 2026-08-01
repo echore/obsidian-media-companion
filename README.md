@@ -1,5 +1,9 @@
 # Media Companion Plugin for Obsidian
 
+## About this fork
+
+This fork adds a local HTTP API (`127.0.0.1`, on by default since v1.3.0, API-key lockdown available) so the [Inspiration Clipper](https://github.com/echore/inspiration-clipper) browser extension can save web images straight into your vault, plus a waterfall gallery view. Everything else follows upstream.
+
 > [!CAUTION]
 > This plugin creates and edits a file for each media file. Before using it on any vault, **make a backup**.
 
